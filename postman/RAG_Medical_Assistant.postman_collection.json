@@ -599,7 +599,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"question\": \"¿Qué signos indican que debo buscar ayuda médica?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"default\"\n}"
+							"raw": "{\n    \"question\": \"Respecto a lo anterior, entonces ¿qué signos indican que debo buscar ayuda médica?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"default\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/ask",

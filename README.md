@@ -63,6 +63,8 @@ While this baseline implementation performs very well, there is significant room
 
 However, this cost-free baseline serves as an excellent starting point that demonstrates the core RAG capabilities and can be incrementally improved with paid services as needed. The architecture is designed to be modular, making it easy to swap components when budget allows.
 
+[Back to top](#table-of-contents)
+
 ## Architecture
 
 The system follows a modular architecture with clear separation of concerns. This design enables easy component swapping, testing, and scaling without affecting other parts of the system.
@@ -143,6 +145,8 @@ The architecture is designed with modularity as a core principle, enabling:
 - **Easy Testing**: Isolated components can be unit tested independently
 - **Horizontal Scaling**: Stateless design allows multiple backend instances
 - **Future-Proof**: New retrieval strategies, chain types, or LLMs can be added without refactoring existing code
+
+[Back to top](#table-of-contents)
 
 ## Design Decisions
 
@@ -345,38 +349,92 @@ These values were chosen after testing with actual medical documents:
 
 ### Retrieval Strategy
 
-**Choice:** Maximum Marginal Relevance (MMR) with configurable search types
+**Choice:** `VectorStoreRetriever` (from ChromaDB vector store) with MMR search type
 
-**Rationale:**
+**Retriever Type:**
+- We use LangChain's `VectorStoreRetriever`, which is created by calling `.as_retriever()` on the ChromaDB vector store
+- This retriever performs semantic search using vector embeddings stored in ChromaDB
+- The retriever converts the user's question to an embedding and finds similar document chunks
+
+**Why VectorStoreRetriever:**
+- Leverages the semantic understanding captured in embeddings
+- Works with our existing vector database infrastructure (ChromaDB)
+- Provides good retrieval quality for medical terminology and concepts
+- Integrates seamlessly with LangChain's chain architecture
+
+**Search Type: Maximum Marginal Relevance (MMR)**
+- **Default search type**: `"mmr"` (Maximum Marginal Relevance)
 - MMR balances relevance and diversity in retrieved documents
 - Prevents redundant results that are too similar to each other
 - Improves answer quality by providing diverse perspectives
 - Better coverage of the document corpus compared to pure similarity search
 
-**Implementation:**
-- Default search type: `"mmr"` (Maximum Marginal Relevance)
+**MMR Implementation:**
 - Retrieves top-k documents (default: 12) from a larger pool (fetch_k: 20)
 - Lambda multiplier (0.5) balances relevance (1.0) and diversity (0.0)
 - Configurable via `search_type` parameter in `get_retriever()`
 
-**Alternative Search Types Supported:**
+**Alternative Search Types (within VectorStoreRetriever):**
 - `"similarity"`: Pure similarity search (fastest, may return redundant results)
 - `"similarity_score_threshold"`: Similarity with minimum score threshold
 - All types can be used by modifying `search_type` parameter
 
+**Alternative Retriever Types (not using vector stores):**
+The architecture supports switching to completely different retriever types:
+
+- **BM25Retriever**: Keyword-based retrieval using BM25 algorithm (no embeddings needed)
+- **WikipediaRetriever**: Retrieves from Wikipedia API (external knowledge source)
+- **EnsembleRetriever**: Combines multiple retrievers (e.g., vector + BM25)
+- **ParentDocumentRetriever**: Retrieves parent documents from smaller chunks
+- **ContextualCompressionRetriever**: Compresses retrieved documents before passing to LLM
+
 **Modularity:**
 The retrieval strategy is isolated in `app/rag/retriever.py`, making it easy to:
-- Switch between MMR, similarity, or threshold-based search
-- Implement custom retrieval logic (e.g., hybrid search with BM25)
+- Switch between MMR, similarity, or threshold-based search (within VectorStoreRetriever)
+- Replace VectorStoreRetriever with BM25Retriever or other retriever types
+- Implement hybrid search combining vector and keyword retrieval
 - Add ensemble retrievers combining multiple strategies
-- Integrate different retriever types (e.g., WikipediaRetriever, BM25Retriever)
-- Change retrieval parameters without affecting other components
+- Change retrieval parameters without affecting other components (chains, prompts, LLM)
+
+**Example: Switching to BM25Retriever**
+```python
+# In retriever.py, replace VectorStoreRetriever with BM25Retriever:
+from langchain_community.retrievers import BM25Retriever
+
+def get_retriever():
+    # Load documents (already split)
+    documents = load_documents()  # would need to implement this
+    # Create BM25 retriever (no vector store needed)
+    retriever = BM25Retriever.from_documents(documents)
+    retriever.k = 12
+    return retriever
+```
+
+**Example: Hybrid Search with EnsembleRetriever**
+```python
+# Combine vector and keyword search:
+from langchain.retrievers import EnsembleRetriever
+from langchain_community.retrievers import BM25Retriever
+
+vector_retriever = vectorstore.as_retriever(search_type="mmr")
+bm25_retriever = BM25Retriever.from_documents(documents)
+ensemble = EnsembleRetriever(
+    retrievers=[vector_retriever, bm25_retriever],
+    weights=[0.7, 0.3]  # 70% vector, 30% keyword
+)
+```
+
+**Current Implementation:**
+- **Retriever Type**: VectorStoreRetriever (semantic search via embeddings)
+- **Search Type**: MMR (Maximum Marginal Relevance)
+- **Vector Store**: ChromaDB
+- This combination provides excellent semantic understanding for medical documents
 
 **Future Improvements:**
-- Hybrid search combining semantic (vector) and keyword (BM25) search
-- Ensemble retriever using multiple retrieval strategies
+- Hybrid search combining semantic (vector) and keyword (BM25) search using EnsembleRetriever
 - Re-ranking of retrieved documents using cross-encoders
 - Query expansion and rewriting for better retrieval
+- Contextual compression to reduce token usage while maintaining relevance
 
 ### LLM Selection
 
@@ -537,6 +595,8 @@ return RetrievalQA.from_chain_type(
 
 **Future Improvement:** Implement per-conversation memory with session IDs
 
+[Back to top](#table-of-contents)
+
 ## System Flow
 
 ### Document Ingestion Flow
@@ -615,6 +675,8 @@ return RetrievalQA.from_chain_type(
    - Stores AI messages (answers)
    - Maintains chronological order
 
+[Back to top](#table-of-contents)
+
 ## Challenges and Solutions
 
 ### Challenge 1: Embedding Model Compatibility
@@ -684,6 +746,8 @@ return RetrievalQA.from_chain_type(
 - Graceful fallback: resources load on-demand if startup fails
 
 **Code Location:** `app/main.py`, `app/api/deps.py`
+
+[Back to top](#table-of-contents)
 
 ## Setup and Installation
 
@@ -778,6 +842,47 @@ curl -X POST http://localhost:8000/api/v1/ingest \
 
 Or use the Postman collection included in `postman/` directory.
 
+### Docker Deployment
+
+The project includes `Dockerfile` and `docker-compose.yml` for containerized deployment:
+
+**Dockerfile Purpose:**
+- Creates a containerized Python environment for the FastAPI backend
+- Installs system dependencies (gcc, g++) needed for some Python packages
+- Installs Python dependencies from `requirements.txt`
+- Copies application code and data directories
+- Exposes port 8000 for the API
+- Provides consistent runtime environment across different machines
+
+**docker-compose.yml Purpose:**
+- Orchestrates multiple services (ChromaDB and Backend) together
+- **ChromaDB Service**: Runs ChromaDB in a container with persistent storage
+- **Backend Service**: Builds and runs the FastAPI application
+- Sets up networking between services (backend can communicate with ChromaDB)
+- Manages volumes for data persistence (PDFs, cache, ChromaDB data)
+- Handles service dependencies (backend waits for ChromaDB to be ready)
+- Simplifies deployment: single command (`docker-compose up`) starts everything
+
+**Benefits of Docker:**
+- **Consistency**: Same environment in development, testing, and production
+- **Isolation**: Services run in isolated containers, avoiding conflicts
+- **Portability**: Works on any machine with Docker installed
+- **Easy Setup**: No need to install Python, ChromaDB, or dependencies manually
+- **Service Orchestration**: Automatically manages multiple services and their relationships
+- **Data Persistence**: Volumes ensure data survives container restarts
+
+**When to Use Docker:**
+- Production deployments
+- Team environments where consistency is important
+- Systems where you want to avoid installing dependencies directly
+- CI/CD pipelines
+- When you need to run ChromaDB and backend together easily
+
+**When Not to Use Docker:**
+- Local development where you prefer native Python environment
+- When you need to debug with direct access to Python interpreter
+- Systems with limited resources (Docker adds overhead)
+
 ### Step 7: Verify Installation
 
 ```bash
@@ -815,6 +920,8 @@ Stop services:
 ```bash
 docker-compose down
 ```
+
+[Back to top](#table-of-contents)
 
 ## API Endpoints
 
@@ -896,6 +1003,8 @@ Asks a medical question and returns an answer with sources.
 }
 ```
 
+[Back to top](#table-of-contents)
+
 ## Configuration
 
 ### Environment Variables
@@ -945,6 +1054,8 @@ Available prompt types are defined in `app/rag/llm_chain.py`. To add a new promp
 2. Create new template constant (e.g., `NEW_TEMPLATE`)
 3. Add mapping in `get_prompt()` function
 
+[Back to top](#table-of-contents)
+
 ## Testing
 
 ### Using cURL
@@ -991,6 +1102,8 @@ Import the collection from `postman/RAG_Medical_Assistant.postman_collection.jso
 Once the server is running, visit:
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
+
+[Back to top](#table-of-contents)
 
 ## Potential Improvements
 
@@ -1082,6 +1195,8 @@ Once the server is running, visit:
    - Support for structured medical data
    - Integration with clinical decision support systems
 
+[Back to top](#table-of-contents)
+
 ## Production Considerations
 
 ### Security
@@ -1158,6 +1273,8 @@ This system is designed to operate at zero cost using free services. However, if
    - **Upgraded (Paid)**: ~$50-500/month depending on usage - GPT-4 API, Pinecone, OpenAI embeddings
    - The free baseline provides excellent value and can be upgraded incrementally based on quality requirements
 
+[Back to top](#table-of-contents)
+
 ## Troubleshooting
 
 ### Common Issues
@@ -1183,6 +1300,8 @@ This system is designed to operate at zero cost using free services. However, if
 - Verify environment variables are set correctly
 - Ensure all services (ChromaDB, backend) are running
 - Review the architecture documentation for flow understanding
+
+[Back to top](#table-of-contents)
 
 ## Contributors
 
