@@ -1,4 +1,4 @@
-# RAG Medical Assistant Backend
+# RAG Medical Assistant Backend - [Demo](https://youtu.be/Yfs_S1sDqpg)
 
 A FastAPI-based backend for a medical assistant powered by Retrieval-Augmented Generation (RAG) using LangChain, ChromaDB, and Google Gemini. This system enables question-answering over medical guides (MSF and Red Cross) with conversational memory support and multiple prompt engineering techniques.
 
@@ -881,26 +881,6 @@ The project includes `Dockerfile` and `docker-compose.yml` for containerized dep
 - Manages volumes for data persistence (PDFs, cache, ChromaDB data)
 - Handles service dependencies (backend waits for ChromaDB to be ready)
 - Simplifies deployment: single command (`docker-compose up`) starts everything
-
-**Benefits of Docker:**
-- **Consistency**: Same environment in development, testing, and production
-- **Isolation**: Services run in isolated containers, avoiding conflicts
-- **Portability**: Works on any machine with Docker installed
-- **Easy Setup**: No need to install Python, ChromaDB, or dependencies manually
-- **Service Orchestration**: Automatically manages multiple services and their relationships
-- **Data Persistence**: Volumes ensure data survives container restarts
-
-**When to Use Docker:**
-- Production deployments
-- Team environments where consistency is important
-- Systems where you want to avoid installing dependencies directly
-- CI/CD pipelines
-- When you need to run ChromaDB and backend together easily
-
-**When Not to Use Docker:**
-- Local development where you prefer native Python environment
-- When you need to debug with direct access to Python interpreter
-- Systems with limited resources (Docker adds overhead)
 
 ### Step 7: Verify Installation
 
