@@ -1,0 +1,39 @@
+services:
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: chroma-medical-backend
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    networks:
+      - rag-network
+
+  backend:
+    build: .
+    container_name: rag-medical-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/pdfs:/app/data/pdfs:ro
+      - ./data/cache:/app/data/cache
+      - ./.env:/app/.env:ro
+    environment:
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+    depends_on:
+      - chroma
+    networks:
+      - rag-network
+    restart: unless-stopped
+
+volumes:
+  chroma_data:
+
+networks:
+  rag-network:
+    driver: bridge
+

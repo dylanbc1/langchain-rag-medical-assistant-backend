@@ -1,0 +1,629 @@
+{
+	"info": {
+		"_postman_id": "rag-medical-assistant-api",
+		"name": "RAG Medical Assistant API",
+		"description": "Colección de endpoints para el asistente médico basado en RAG con diferentes técnicas de prompt engineering",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health & Setup",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						},
+						"description": "Verifica el estado del servicio"
+					},
+					"response": []
+				},
+				{
+					"name": "Ingest Documents",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"force\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ingest",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ingest"
+							]
+						},
+						"description": "Indexa los documentos PDF desde data/pdfs/"
+					},
+					"response": []
+				},
+				{
+					"name": "Ingest Documents (Force)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"force\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ingest",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ingest"
+							]
+						},
+						"description": "Fuerza la regeneración del índice (elimina y recrea la colección)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Prompt: Default",
+			"description": "Prompt estructurado con secciones (comportamiento por defecto)",
+			"item": [
+				{
+					"name": "Ask - Quemadura (con memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Qué debo hacer si alguien tiene una quemadura?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"default\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre quemaduras usando prompt default con memoria conversacional"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask - Atragantamiento (sin memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Qué hacer en caso de atragantamiento?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"default\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre atragantamiento usando prompt default sin memoria"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Prompt: Few Shot",
+			"description": "Prompt con ejemplos de preguntas y respuestas para guiar al modelo",
+			"item": [
+				{
+					"name": "Ask - Herida (con memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cómo limpiar y tratar una herida abierta?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"few_shot\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre heridas usando few-shot prompt con memoria"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask - Fiebre (sin memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cómo tratar la fiebre en un adulto?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"few_shot\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre fiebre usando few-shot prompt sin memoria"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask - RCP (con memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cómo realizar RCP en un adulto?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"few_shot\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre RCP usando few-shot prompt con memoria"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Prompt: Chain of Thought",
+			"description": "Prompt con razonamiento paso a paso para mejorar la calidad de las respuestas",
+			"item": [
+				{
+					"name": "Ask - Shock (con memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuáles son los signos de shock y qué hacer?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"chain_of_thought\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre shock usando chain-of-thought prompt con memoria"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask - Ansiedad (sin memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"Tengo un paciente con ansiedad, ¿qué hago?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"chain_of_thought\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre ansiedad usando chain-of-thought prompt sin memoria"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask - Depresión (con memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuáles son los síntomas de depresión y cómo se trata?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"chain_of_thought\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre depresión usando chain-of-thought prompt con memoria"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Prompt: Structured",
+			"description": "Prompt altamente estructurado con formato estricto para respuestas consistentes",
+			"item": [
+				{
+					"name": "Ask - Quemadura (sin memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Qué debo hacer si alguien tiene una quemadura?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"structured\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre quemaduras usando structured prompt sin memoria"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask - Herida (con memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cómo limpiar y tratar una herida abierta?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"structured\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre heridas usando structured prompt con memoria"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask - RCP (sin memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cómo realizar RCP en un adulto?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"structured\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre RCP usando structured prompt sin memoria"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Prompt: Direct",
+			"description": "Prompt directo y conciso para respuestas rápidas y al punto",
+			"item": [
+				{
+					"name": "Ask - Fiebre (con memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cómo tratar la fiebre en un adulto?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"direct\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre fiebre usando direct prompt con memoria"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask - Atragantamiento (sin memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Qué hacer en caso de atragantamiento?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"direct\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre atragantamiento usando direct prompt sin memoria"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask - Shock (con memoria)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuáles son los signos de shock y qué hacer?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"direct\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta sobre shock usando direct prompt con memoria"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Conversation Flow Tests",
+			"description": "Pruebas de flujo conversacional para verificar la memoria",
+			"item": [
+				{
+					"name": "Conversation 1 - First Question",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Qué hacer en caso de quemadura?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"default\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Primera pregunta de la conversación"
+					},
+					"response": []
+				},
+				{
+					"name": "Conversation 2 - Follow-up",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Y si la quemadura es muy extensa?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"default\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Pregunta de seguimiento que debería recordar el contexto anterior"
+					},
+					"response": []
+				},
+				{
+					"name": "Conversation 3 - Another Follow-up",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Qué signos indican que debo buscar ayuda médica?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"default\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Tercera pregunta de seguimiento para verificar continuidad conversacional"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
