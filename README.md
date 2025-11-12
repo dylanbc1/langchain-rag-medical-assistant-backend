@@ -32,7 +32,7 @@ This RAG system processes medical PDF documents, converts them into searchable v
 **Key Features:**
 - Document ingestion from PDF files
 - Semantic search using vector embeddings
-- Multiple prompt engineering strategies (default, few-shot, chain-of-thought, structured, direct)
+- Multiple prompt engineering strategies (default, few-shot, chain-of-thought, structured, direct, anti-hallucination, react, least-to-most)
 - Conversational memory for multi-turn interactions
 - RESTful API with FastAPI
 - Docker support for easy deployment
@@ -565,6 +565,25 @@ return RetrievalQA.from_chain_type(
 5. **Direct (`direct`)**: Concise and direct answers
    - Best for: Simple questions requiring quick answers
    - Minimizes token usage and response time
+
+6. **Anti-Hallucination (`anti_hallucination`)**: Explicit verification against context with citations
+   - Best for: Critical applications where accuracy and source verification are essential
+   - Requires the model to cite specific parts of the context that support each claim
+   - Includes verification section listing context excerpts that back up the answer
+   - Explicitly identifies information not found in the context
+
+7. **ReAct (`react`)**: Reasoning and Acting with iterative verification
+   - Best for: Complex problems requiring iterative problem-solving and verification
+   - Intercalates thinking and action steps for iterative verification
+   - Model explicitly shows: initial thought, action (search in context), observation, iterative thinking, additional actions if needed, final answer
+   - Useful for questions that may require multiple passes through the context
+
+8. **Least-to-Most (`least_to_most`)**: Breaks down questions into sub-problems, solving sequentially
+   - Best for: Complex multi-part questions that can be decomposed
+   - Model first decomposes the main question into simpler sub-questions
+   - Then solves each sub-problem sequentially using context information
+   - Finally integrates all sub-answers into a comprehensive response
+   - Particularly effective for questions with multiple aspects or dependencies
 
 **System Prompt Design:**
 - Emphasizes using ONLY information from context

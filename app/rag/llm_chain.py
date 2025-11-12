@@ -30,6 +30,9 @@ class PromptType(str, Enum):
     CHAIN_OF_THOUGHT = "chain_of_thought"  # step-by-step reasoning
     STRUCTURED = "structured"  # highly structured with strict format
     DIRECT = "direct"  # concise and direct answer
+    ANTI_HALLUCINATION = "anti_hallucination"  # explicit verification against context
+    REACT = "react"  # reasoning and acting with iterative verification
+    LEAST_TO_MOST = "least_to_most"  # breaks down into sub-problems sequentially
 
 # base system prompt used by all prompt types
 BASE_SYSTEM_PROMPT = """
@@ -193,6 +196,149 @@ Incluye los pasos, síntomas, tratamientos o recomendaciones mencionados en el c
 Si no encuentras información relevante en el contexto, di "No tengo suficiente información médica para responder con certeza".
 """.strip()
 
+# anti-hallucination prompt with explicit verification
+ANTI_HALLUCINATION_TEMPLATE = """
+{system_prompt}
+
+<context>
+{context}
+</context>
+
+Pregunta del usuario: {question}
+
+INSTRUCCIONES CRÍTICAS PARA PREVENIR ALUCINACIONES:
+
+1. VERIFICACIÓN EXPLÍCITA:
+Antes de responder, identifica EXACTAMENTE qué información del contexto es relevante para la pregunta.
+Cita las frases o párrafos específicos del contexto que respaldan tu respuesta.
+
+2. CONFIRMACIÓN DE FUENTE:
+Para cada hecho que menciones, verifica que esté explícitamente presente en el contexto proporcionado.
+Si no puedes encontrar una mención directa en el contexto, NO lo incluyas en tu respuesta.
+
+3. RESPUESTA CON CITAS:
+Proporciona tu respuesta y luego incluye una sección "Verificación" que liste las partes específicas del contexto que respaldan cada afirmación.
+
+4. RECONOCIMIENTO DE LÍMITES:
+Si el contexto no contiene suficiente información para responder completamente, indica claramente qué información falta.
+
+FORMATO DE RESPUESTA:
+
+**Respuesta:**
+[Tu respuesta basada únicamente en el contexto]
+
+**Verificación contra el contexto:**
+- Afirmación 1: [Cita específica del contexto que la respalda]
+- Afirmación 2: [Cita específica del contexto que la respalda]
+- [Continúa para cada afirmación importante]
+
+**Información no encontrada en el contexto:**
+[Si hay aspectos de la pregunta que no están cubiertos en el contexto, menciónalos aquí]
+
+IMPORTANTE: Si no puedes encontrar información relevante en el contexto, responde "No tengo suficiente información médica para responder con certeza" y explica qué información falta.
+""".strip()
+
+# ReAct prompt: reasoning and acting with iterative verification
+REACT_TEMPLATE = """
+{system_prompt}
+
+<context>
+{context}
+</context>
+
+Pregunta del usuario: {question}
+
+INSTRUCCIONES - MÉTODO ReAct (Reasoning and Acting):
+
+Este método intercala pensamiento y acción para verificación iterativa. Sigue estos pasos:
+
+PASO 1 - PENSAMIENTO INICIAL:
+Piensa: ¿Qué información necesito para responder esta pregunta? ¿Qué aspectos debo buscar en el contexto?
+
+PASO 2 - ACCIÓN: BÚSQUEDA EN EL CONTEXTO
+Acción: Busca en el contexto información relevante sobre: [lista los aspectos que identificaste]
+
+PASO 3 - OBSERVACIÓN Y VERIFICACIÓN
+Observación: ¿Qué información encontré? ¿Es suficiente? ¿Necesito buscar más información?
+
+PASO 4 - PENSAMIENTO ITERATIVO
+Pensamiento: Basándome en lo que encontré, ¿puedo responder la pregunta? Si falta información, ¿qué más debo buscar?
+
+PASO 5 - ACCIÓN ADICIONAL (si es necesario)
+Acción: Busca información adicional sobre: [aspectos que aún faltan]
+
+PASO 6 - OBSERVACIÓN FINAL
+Observación: Ahora tengo [resumen de la información encontrada]. Puedo construir una respuesta completa.
+
+PASO 7 - RESPUESTA FINAL
+Responde la pregunta del usuario usando SOLO la información verificada en los pasos anteriores.
+
+FORMATO DE RESPUESTA:
+
+**Pensamiento inicial:**
+[Tu análisis de qué información necesitas]
+
+**Acción: Búsqueda en el contexto**
+[Qué buscas y dónde lo buscas]
+
+**Observación:**
+[Qué encontraste]
+
+**Pensamiento iterativo:**
+[Tu evaluación de si necesitas más información]
+
+**Respuesta final:**
+[Tu respuesta completa basada en las observaciones verificadas]
+""".strip()
+
+# least-to-most prompt: breaks down into sub-problems
+LEAST_TO_MOST_TEMPLATE = """
+{system_prompt}
+
+<context>
+{context}
+</context>
+
+Pregunta del usuario: {question}
+
+INSTRUCCIONES - MÉTODO Least-to-Most:
+
+Este método descompone la pregunta en sub-problemas más simples y los resuelve secuencialmente.
+
+PASO 1 - DESCOMPOSICIÓN:
+Descompón la pregunta principal en sub-preguntas más simples y específicas que puedas responder una por una.
+
+PASO 2 - RESOLUCIÓN SECUENCIAL:
+Resuelve cada sub-pregunta en orden, usando la información del contexto. Cada respuesta debe basarse en información verificada del contexto.
+
+PASO 3 - INTEGRACIÓN:
+Combina las respuestas de los sub-problemas para construir la respuesta final a la pregunta principal.
+
+FORMATO DE RESPUESTA:
+
+**Descomposición de la pregunta:**
+La pregunta principal se puede dividir en estos sub-problemas:
+1. [Sub-pregunta 1]
+2. [Sub-pregunta 2]
+3. [Sub-pregunta 3]
+[Continúa según sea necesario]
+
+**Resolución de sub-problemas:**
+
+Sub-problema 1: [Sub-pregunta 1]
+- Información del contexto: [cita específica]
+- Respuesta: [respuesta basada en el contexto]
+
+Sub-problema 2: [Sub-pregunta 2]
+- Información del contexto: [cita específica]
+- Respuesta: [respuesta basada en el contexto]
+
+[Continúa para cada sub-problema]
+
+**Respuesta integrada:**
+[Combina todas las respuestas de los sub-problemas para dar una respuesta completa y coherente a la pregunta principal]
+""".strip()
+
 
 def get_llm(model_name: Optional[str] = None, temperature: float = 0.2, settings: Optional[Settings] = None) -> ChatGoogleGenerativeAI:
     """Initialize and return Gemini LLM client."""
@@ -246,6 +392,9 @@ def get_prompt(prompt_type: PromptType = PromptType.DEFAULT) -> PromptTemplate:
         PromptType.CHAIN_OF_THOUGHT: CHAIN_OF_THOUGHT_TEMPLATE,
         PromptType.STRUCTURED: STRUCTURED_TEMPLATE,
         PromptType.DIRECT: DIRECT_TEMPLATE,
+        PromptType.ANTI_HALLUCINATION: ANTI_HALLUCINATION_TEMPLATE,
+        PromptType.REACT: REACT_TEMPLATE,
+        PromptType.LEAST_TO_MOST: LEAST_TO_MOST_TEMPLATE,
     }
     
     template = template_map.get(prompt_type, DEFAULT_TEMPLATE)

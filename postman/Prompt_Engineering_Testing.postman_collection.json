@@ -1,0 +1,548 @@
+{
+	"info": {
+		"_postman_id": "prompt-engineering-testing",
+		"name": "Prompt Engineering Testing",
+		"description": "Collection for testing different prompt engineering techniques with a specific question that has an exact numeric answer",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						},
+						"description": "Verify service is running"
+					},
+					"response": []
+				},
+				{
+					"name": "Ingest Documents",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"force\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ingest",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ingest"
+							]
+						},
+						"description": "Index PDF documents before testing"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Question: Rescue Breaths for Drowning Victims",
+			"description": "Test question: '¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?'\nExpected answer: 2\nSource: Cruz Roja Manual, Chapter 1",
+			"item": [
+				{
+					"name": "Default Prompt (no memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"default\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Default structured prompt without memory"
+					},
+					"response": []
+				},
+				{
+					"name": "Few-Shot Prompt (no memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"few_shot\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Few-shot prompt with examples"
+					},
+					"response": []
+				},
+				{
+					"name": "Chain-of-Thought Prompt (no memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"chain_of_thought\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Chain-of-thought with step-by-step reasoning"
+					},
+					"response": []
+				},
+				{
+					"name": "Structured Prompt (no memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"structured\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Highly structured prompt with strict format"
+					},
+					"response": []
+				},
+				{
+					"name": "Direct Prompt (no memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"direct\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Direct and concise prompt"
+					},
+					"response": []
+				},
+				{
+					"name": "Anti-Hallucination Prompt (no memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"anti_hallucination\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Anti-hallucination prompt with explicit verification"
+					},
+					"response": []
+				},
+				{
+					"name": "ReAct Prompt (no memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"react\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "ReAct: Reasoning and Acting with iterative verification"
+					},
+					"response": []
+				},
+				{
+					"name": "Least-to-Most Prompt (no memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": false,\n    \"prompt_type\": \"least_to_most\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Least-to-Most: Breaks down into sub-problems sequentially"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Question: Rescue Breaths (with memory)",
+			"description": "Same test question but with conversational memory enabled",
+			"item": [
+				{
+					"name": "Default Prompt (with memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"default\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Default prompt with conversational memory"
+					},
+					"response": []
+				},
+				{
+					"name": "Few-Shot Prompt (with memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"few_shot\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Few-shot prompt with memory"
+					},
+					"response": []
+				},
+				{
+					"name": "Chain-of-Thought Prompt (with memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"chain_of_thought\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Chain-of-thought with memory"
+					},
+					"response": []
+				},
+				{
+					"name": "Structured Prompt (with memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"structured\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Structured prompt with memory"
+					},
+					"response": []
+				},
+				{
+					"name": "Direct Prompt (with memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"direct\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Direct prompt with memory"
+					},
+					"response": []
+				},
+				{
+					"name": "Anti-Hallucination Prompt (with memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"anti_hallucination\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Anti-hallucination prompt with memory"
+					},
+					"response": []
+				},
+				{
+					"name": "ReAct Prompt (with memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"react\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "ReAct prompt with memory"
+					},
+					"response": []
+				},
+				{
+					"name": "Least-to-Most Prompt (with memory)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"¿Cuántos soplos de respiración de salvamento se deben dar a una víctima de ahogos?\",\n    \"use_memory\": true,\n    \"prompt_type\": \"least_to_most\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/ask",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ask"
+							]
+						},
+						"description": "Least-to-Most prompt with memory"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
+
